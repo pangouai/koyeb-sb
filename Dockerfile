@@ -2,6 +2,7 @@ FROM alpine:3.20
 
 ARG SINGBOX_VER=1.14.4
 ARG OPENLIST_VER=4.2.9
+ARG CACHEBUST=1
 
 RUN apk add --no-cache ca-certificates tzdata wget tar caddy libstdc++
 
@@ -26,8 +27,11 @@ RUN wget -q -O /tmp/ol.tar.gz \
 COPY singbox.tpl.json /opt/singbox/config.tpl.json
 COPY Caddyfile        /etc/caddy/Caddyfile
 COPY entrypoint.sh    /entrypoint.sh
-RUN chmod +x /entrypoint.sh \
- && mkdir -p /opt/openlist/data /tmp/temp /tmp/bleve /data
+
+# CACHEBUST 强制这一层及其后重新构建
+RUN echo "build ${CACHEBUST}" \
+ && chmod +x /entrypoint.sh \
+ && mkdir -p /opt/openlist/data /tmp/temp /tmp/bleve
 
 ENV TZ=Asia/Shanghai \
     NODE_UUID=2a7108f4-b462-4d6d-a5f5-d611aef9c35a \
