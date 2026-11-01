@@ -1,0 +1,22 @@
+# Caddy 做路径分流（比 nginx 简单，无 if 陷阱）
+#   <NODE_PATH>  → sing-box (127.0.0.1:10000)
+#   其余          → OpenList (127.0.0.1:5244)
+
+{
+	admin off
+	auto_https off
+}
+
+:{$PORT:8000} {
+	# 节点路径：WebSocket 反代
+	handle {$NODE_PATH:/fe82f69e}* {
+		reverse_proxy 127.0.0.1:{$SB_PORT:10000} {
+			flush_interval -1
+		}
+	}
+
+	# 其余：OpenList
+	handle {
+		reverse_proxy 127.0.0.1:{$OL_PORT:5244}
+	}
+}
