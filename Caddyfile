@@ -1,6 +1,5 @@
-# Caddy 做路径分流（比 nginx 简单，无 if 陷阱）
-#   <NODE_PATH>  → sing-box (127.0.0.1:10000)
-#   其余          → OpenList (127.0.0.1:5244)
+# 路径分流：节点路径 → sing-box，其余 → OpenList
+# 单一域名（Koyeb 自带），无需 Host 改写。
 
 {
 	admin off
@@ -8,7 +7,7 @@
 }
 
 :{$PORT:8000} {
-	# 节点路径：WebSocket 反代
+	# 节点路径：WebSocket 反代到 sing-box
 	handle {$NODE_PATH:/fe82f69e}* {
 		reverse_proxy 127.0.0.1:{$SB_PORT:10000} {
 			flush_interval -1
