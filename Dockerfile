@@ -1,16 +1,18 @@
-FROM alpine:latest
+FROM alpine:3.20
 
 ARG SINGBOX_VER=1.14.4
-ARG TARGETARCH=amd64
 
-RUN apk add --no-cache curl tar ca-certificates tzdata && \
-    curl -L -o /tmp/sb.tar.gz \
-      "https://github.com/SagerNet/sing-box/releases/download/v${SINGBOX_VER}/sing-box-${SINGBOX_VER}-linux-${TARGETARCH}.tar.gz" && \
-    tar xzf /tmp/sb.tar.gz -C /tmp && \
-    mv /tmp/sing-box-${SINGBOX_VER}-linux-${TARGETARCH}/sing-box /usr/local/bin/ && \
-    chmod +x /usr/local/bin/sing-box && \
-    rm -rf /tmp/sb.tar.gz /tmp/sing-box-* && \
-    apk del curl tar
+RUN apk add --no-cache ca-certificates tzdata wget
+
+# 下载并安装 sing-box（musl 版，适配 alpine）
+RUN wget -q -O /tmp/sb.tar.gz \
+      "https://github.com/SagerNet/sing-box/releases/download/v${SINGBOX_VER}/sing-box-${SINGBOX_VER}-linux-amd64-musl.tar.gz" \
+ && tar xzf /tmp/sb.tar.gz -C /tmp \
+ && find /tmp -name sing-box -type f \
+ && cp /tmp/sing-box-${SINGBOX_VER}-linux-amd64-musl/sing-box /usr/local/bin/sing-box \
+ && chmod +x /usr/local/bin/sing-box \
+ && rm -rf /tmp/sb.tar.gz /tmp/sing-box-* \
+ && /usr/local/bin/sing-box version
 
 COPY config.json /etc/sing-box/config.json
 COPY entrypoint.sh /entrypoint.sh
