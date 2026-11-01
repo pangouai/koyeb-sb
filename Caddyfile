@@ -15,7 +15,12 @@
 	}
 
 	# 其余：OpenList
+	# OpenList 启动比 Caddy 慢（要连 Supabase 跑迁移，约 60~70s），
+	# 这里让 Caddy 在连接失败时持续重试，避免部署后出现 502 窗口。
 	handle {
-		reverse_proxy 127.0.0.1:{$OL_PORT:5244}
+		reverse_proxy 127.0.0.1:{$OL_PORT:5244} {
+			lb_try_duration 120s
+			lb_try_interval 500ms
+		}
 	}
 }
